@@ -190,17 +190,21 @@ jobs:
             #This doesn't work cos yum not in image.
             #yum install -y tar gzip 
             #apt-get install tar -y
-            apk add --update tar
+            ##OK -->apk add --update tar
             echo "installing gzip..."
             #apt-get install gzip -y
-            apk add --update gzip
+            ##OK -->apk add --update gzip
             #apt-get update
             echo "installing AWS cli..."
             #apt-get install -y awscli            
             apk add --update awscli                      
             echo "installing ansible..."
-            apk add --update ansible
+            #NOT OK apk add --update ansible
             #echo "update package index files"        WHAT is this step?
+            apk add python curl
+            curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+            unzip awscli-bundle.zip
+            ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
       - run:
           name: Configure server
           command: |
