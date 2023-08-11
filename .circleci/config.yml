@@ -200,10 +200,9 @@ jobs:
             #apt-get install -y awscli            
             #apk add --update awscli                       
             
-            cd .
             #JUST THIS....
-            #apt-get update -y
-            #apt install ansible -y
+            apt-get update -y
+            apt install ansible -y
             
             #echo "installing ansible..."                      
             #NOT OK apk add --update ansible
