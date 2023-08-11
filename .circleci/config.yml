@@ -198,7 +198,7 @@ jobs:
             #apt-get update
             #echo "installing AWS cli..."
             #apt-get install -y awscli            
-            #apk add --update awscli                      
+            #apk add --update awscli                       
             apt-get update -y
             apt install ansible -y
             
