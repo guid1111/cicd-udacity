@@ -164,7 +164,7 @@ jobs:
             # Dynamically build inventory.txt file.
             cd .circleci/ansible
             echo "[all]" >> inventory.txt
-            echo "52.87.181.42" >> inventory.txt
+            echo "3.86.105.61" >> inventory.txt
             #aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --output text >> inventory.txt            
       - persist_to_workspace:
           root: ~/
