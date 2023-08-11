@@ -4,22 +4,25 @@
   apt:
     upgrade: "yes"
 #missing?  - Install Python - not sure if below is right - why python3?
-- name: "install python"
-  become: true
-  apt:
-    name: ["python3-pip"]
+# This all works when connect to server and execute on command line
+#but some prompt will take X amount of disk spsace do you wish to continue??
 
-- name: "install dependencies."
-  become: true
-  apt:
-    name: ["nodejs", "npm"]
-    state: latest
-    update_cache: yes
+# - name: "install python"
+#   become: true
+#   apt:
+#     name: ["python3-pip"]
 
-- name: "install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
+# - name: "install dependencies."
+#   become: true
+#   apt:
+#     name: ["nodejs", "npm"]
+#     state: latest
+#     update_cache: yes
+
+# - name: "install pm2"
+#   become: true
+#   npm:
+#     name: pm2
+#     global: yes
+#     production: yes
+#     state: present
