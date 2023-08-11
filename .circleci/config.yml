@@ -139,7 +139,8 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      #notes say install tar and gzip at this point - not sure why they would be required???
+      #required for workspace persistence.
+      - run: yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
