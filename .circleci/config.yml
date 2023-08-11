@@ -186,18 +186,22 @@ jobs:
       - run:
           name: Install dependencies on the server
           command: |            
-            apt-get update
+            #apt-get update
             echo "installing AWS cli..."
-            apt-get install -y awscli            
+            #apt-get install -y awscli            
+            apk add --update awscli
             echo "installing tar..."
             #This doesn't work cos yum not in image.
             #yum install -y tar gzip 
-            apt-get install tar -y
+            #apt-get install tar -y
+            apk add --update tar
             echo "installing gzip..."
-            apt-get install gzip -y
+            #apt-get install gzip -y
+            apk add --update gzip
+            
             echo "installing ansible..."
             apk add --update ansible
-            echo "update package index files"            
+            #echo "update package index files"        WHAT is this step?
       - run:
           name: Configure server
           command: |
