@@ -1,0 +1,1 @@
+aws cloudformation validate-template --template-body file://..//.circleci/files/backend.yml  --region=us-east-1
