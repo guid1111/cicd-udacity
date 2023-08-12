@@ -160,7 +160,7 @@ jobs:
             #echo "3.86.105.61" >> inventory.txt
             aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --output text >> inventory.txt            
             #aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> inventory.txt            
-            cat invetory.txt
+            cat inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
