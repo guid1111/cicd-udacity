@@ -13,9 +13,10 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} 
       - run: 
-          name: Destroy Back End environment
+          name: Destroy Back End environment. Empty bucket first.
           when: on_fail
           command: |
+            aws s3 rm s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} 
 
 #   revert-migrations:
@@ -204,6 +205,8 @@ jobs:
             npm run migrations > migrations_dump.txt
             echo "migrations dump file"
             cat migrations_dump.txt
+            #https://knowledge.udacity.com/questions/999887
+            echo -e "NODE_ENV=local\nVERSION=1\nTYPEORM_CONNECTION=${TYPEORM_CONNECTION}\nTYPEORM_MIGRATIONS_DIR=${TYPEORM_MIGRATIONS_DIR}\nTYPEORM_ENTITIES=${TYPEORM_ENTITIES}\nTYPEORM_MIGRATIONS=${TYPEORM_MIGRATIONS}\nTYPEORM_HOST=${TYPEORM_HOST}\nTYPEORM_PORT=${TYPEORM_PORT}\nTYPEORM_USERNAME=${TYPEORM_USERNAME}\nTYPEORM_PASSWORD=${TYPEORM_PASSWORD}\nTYPEORM_DATABASE=${TYPEORM_DATABASE}" >> backend/.env
       - run:
           name: Send migration results to memstash
           command: |
@@ -232,7 +235,7 @@ jobs:
       - run:
           name: Get backend url
           command: |            
-            export BACKEND_DNSNAME=$(eaws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --output text)            
+            export BACKEND_DNSNAME=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --output text)                        
             export API_URL="http://${BACKEND_DNSNAME}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_DNSNAME}:3030" >> frontend/.env

@@ -5,10 +5,10 @@
   command: "pm2 stop default"
   ignore_errors: True 
 
-- name: pm2 stop
+- name: pm2 start
   become: true
   command: "pm2 start npm -- start"
-  ignore_errors: True 
+  #ignore_errors: True 
 
 #npm install ALREADY DONE??
 #pm2 stop default
