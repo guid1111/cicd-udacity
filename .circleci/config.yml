@@ -226,9 +226,10 @@ jobs:
   run-migrations:
     docker:
       # Docker image here that supports NodeJS
-      #- image: circleci/node:13.8.0      
+      #Use posgres 13....I think.
+      - image: circleci/node:13.8.0      
       #See - https://knowledge.udacity.com/questions/999473
-      - image: circleci/node:14.18.1
+      #- image: circleci/node:14.18.1
     steps:
       # Checkout code from git
       # THIS one needs database to be up and running and the environment variables set up in circle CI...
