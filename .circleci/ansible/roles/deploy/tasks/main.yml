@@ -1,9 +1,26 @@
 ---
 
+
 - name: pm2 stop
   become: true
   command: "pm2 stop default"
   ignore_errors: True 
+
+#Pretty sure I'm missing the part where actually install the udapeople app!
+- name: make dir
+  become: true
+  shell: mkdir -p ~/application
+
+- name: deploy app
+  become: true
+  unarchive:
+    src: artifact.tar.gz
+    dest: ~/application/
+
+- name: start node app
+  shell: |
+    cd ~/application
+    pm2 start main.js
 
 - name: pm2 start
   become: true

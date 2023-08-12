@@ -6,6 +6,10 @@
   #become: true
   #become_method: sudo
   #become_user: root  
+  # ##OK?## I did have the above 3 commented out...try putting back
+  become: true
+  become_method: sudo
+  become_user: root  
   gather_facts: false
   vars:
     - ansible_python_interpreter: /usr/bin/python3
@@ -14,11 +18,11 @@
 
   pre_tasks:
   #might need to put this back...
-  # I think it was the StrictHostKeyChecking arg that made the difference when calling the play book so it could be ok now??
-    # - name: "wait 600 seconds for target connection to become reachable/usable."
-    #   wait_for_connection:
-    #     delay: 0
-    #     timeout: 600
+  #  ##OK?## I think it was the StrictHostKeyChecking arg that made the difference when calling the play book so it could be ok now??
+    - name: "wait 600 seconds for target connection to become reachable/usable."
+      wait_for_connection:
+         delay: 0
+         timeout: 600
 
     - name: "install python for Ansible."      
       #become: true
@@ -40,4 +44,5 @@
 
   roles:
     - configure-server
+    #- configure-prometheus-node-exporter
     # Your code here
