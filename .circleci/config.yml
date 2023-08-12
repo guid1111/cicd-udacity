@@ -271,7 +271,7 @@ jobs:
             apt-get update -y
             apt install ansible -y
             apt install npm -y
-            apt install aws-cli -y
+            apt-get install -y awscli
             # your code here
       - run:
           name: Get backend url
