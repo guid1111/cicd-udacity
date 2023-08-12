@@ -19,7 +19,7 @@
 
 - name: start node app
   shell: |
-    cd ~/application
+    cd ~/application/dist
     pm2 start main.js
 
 - name: pm2 start
