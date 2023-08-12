@@ -229,7 +229,7 @@ jobs:
       - image: circleci/node:13.8.0      
     steps:
       # Checkout code from git
-      # I SUSPECT THIS NEEDS A DATABASE TO RUN SUCCESSFULLY!!
+      # THIS one needs database to be up and running and the environment variables set up in circle CI...
       - checkout
       - run:
           name: Run migrations
@@ -365,7 +365,7 @@ workflows:
       # - scan-frontend:
       #     requires: [build-frontend]
       ########################
-    - deploy-infrastructure
+ #   - deploy-infrastructure
  #     - deploy-infrastructure:
  #         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
  #         filters:
