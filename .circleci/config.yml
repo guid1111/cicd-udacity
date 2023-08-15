@@ -188,13 +188,35 @@ jobs:
           name: Install Ansible
           command: |                        
             apt-get update -y
-            apt install ansible -y                      
+            apt install ansible -y    
+      - run: 
+          name: Setup Environment Variables
+          command: |
+            cd backend
+            touch .env
+            echo "NODE_ENV=production" >> .env
+            echo "VERSION=1" >> .env
+            echo "TYPEORM_CONNECTION=postgres" >> .env
+            echo "TYPEORM_MIGRATIONS_DIR=./src/migrations" >> .env
+            echo "TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts" >> .env
+            echo "TYPEORM_MIGRATIONS=./src/migrations/*.ts" >> .env
+            echo "TYPEORM_HOST=${TYPEORM_HOST}" >> .env
+            echo "TYPEORM_PORT=${TYPEORM_PORT}"" >> .env
+            echo "TYPEORM_USERNAME=${TYPEORM_USERNAME}" >> .env
+            echo "TYPEORM_PASSWORD=${TYPEORM_PASSWORD}" >> .env
+            echo "TYPEORM_DATABASE=${TYPEORM_DATABASE" >> .env
+            cat .env
+            cd ..
       - run:
           name: Configure Server
           command: |            
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend/.env
       #- destroy-environment
 
   run-migrations:

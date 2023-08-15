@@ -17,8 +17,6 @@
     - ansible_stdout_callback: yaml
 
   pre_tasks:
-  #might need to put this back...
-  #  ##OK?## I think it was the StrictHostKeyChecking arg that made the difference when calling the play book so it could be ok now??
     - name: "wait 600 seconds for target connection to become reachable/usable."
       wait_for_connection:
          delay: 0
@@ -30,7 +28,7 @@
       changed_when: false
       # Your code here
 
-  # Get the environment variables from CircleCI and add to the EC2 instance
+
   environment:
     - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"
     - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"

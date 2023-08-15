@@ -10,9 +10,6 @@
   become: true
   apt:
     upgrade: "yes"
-#missing?  - Install Python - not sure if below is right - why python3?
-# This all works when connect to server and execute on command line
-#but some prompt will take X amount of disk spsace do you wish to continue??
 
 - name: "install python"
   become: true
@@ -35,20 +32,20 @@
     state: present
 
 
-#https://knowledge.udacity.com/questions/999887
-- name: "exporting env variables"
-  become: true
-  shell:  |    
-    touch /etc/profile.d/env.sh
-    echo export TYPEORM_HOST=$TYPTYPEORM_HOST >> /etc/profile.d/env.sh
-    echo export TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> /etc/profile.d/env.sh
-    echo export TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> /etc/profile.d/env.sh
-    echo export TYPEORM_HOST=$TYPEORM_HOST >> /etc/profile.d/env.sh
-    echo export TYPEORM_PORT=$TYPEORM_PORT >> /etc/profile.d/env.sh
-    echo export TYPEORM_USERNAME=$TYPEORM_USERNAME >> /etc/profile.d/env.sh
-    echo export TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> /etc/profile.d/env.sh
-    echo export TYPEORM_DATABASE=$TYPEORM_DATABASE >> /etc/profile.d/env.sh
-    echo export TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> /etc/profile.d/env.sh
-    echo export TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> /etc/profile.d/env.sh
-    . /etc/environment
-    . ~/.bashrc
+# #https://knowledge.udacity.com/questions/999887
+# - name: "exporting env variables"
+#   become: true
+#   shell:  |    
+#     touch /etc/profile.d/env.sh
+#     echo export TYPEORM_HOST=$TYPTYPEORM_HOST >> /etc/profile.d/env.sh
+#     echo export TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> /etc/profile.d/env.sh
+#     echo export TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> /etc/profile.d/env.sh
+#     echo export TYPEORM_HOST=$TYPEORM_HOST >> /etc/profile.d/env.sh
+#     echo export TYPEORM_PORT=$TYPEORM_PORT >> /etc/profile.d/env.sh
+#     echo export TYPEORM_USERNAME=$TYPEORM_USERNAME >> /etc/profile.d/env.sh
+#     echo export TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> /etc/profile.d/env.sh
+#     echo export TYPEORM_DATABASE=$TYPEORM_DATABASE >> /etc/profile.d/env.sh
+#     echo export TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> /etc/profile.d/env.sh
+#     echo export TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> /etc/profile.d/env.sh
+#     . /etc/environment
+#     . ~/.bashrc
