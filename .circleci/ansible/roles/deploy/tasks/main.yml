@@ -19,10 +19,11 @@
     src: artifact.tar.gz
     dest: ~/application
 
-- name: start node app
-  shell: |
-    cd ~/application/dist
-    pm2 start main.js
+#Not sure if need this?
+# - name: start node app
+#   shell: |
+#     cd ~/application/dist
+#     pm2 start main.js
 
 - name: pm2 start
   become: true
