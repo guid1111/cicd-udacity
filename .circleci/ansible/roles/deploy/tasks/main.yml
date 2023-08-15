@@ -7,14 +7,15 @@
   ignore_errors: True 
 
 #Pretty sure I'm missing the part where actually install the udapeople app!
-- name: crate application directory
+- name: create application directory
   file:
     path: ~/application
-    state: directory  
+    state: directory 
 
-- name: deploy app
+- name: copy from local to remote and unpack on remote server
   become: true
   unarchive:
+    copy: true
     src: artifact.tar.gz
     dest: ~/application
 
