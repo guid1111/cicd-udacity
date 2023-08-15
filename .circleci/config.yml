@@ -151,7 +151,7 @@ jobs:
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"                            
       - run:
-          name: Ensure front-end infrastructure exist
+          name: Ensure front-end infrastructure exists
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
@@ -181,7 +181,7 @@ jobs:
     steps:      
       - checkout      
       - add_ssh_keys:
-          fingerprints: ["4f:fe:90:2b:6b:8f:6d:40:84:18:6d:cf:08:f4:e4:22"]
+          fingerprints: ["d7:74:35:39:50:b2:4d:3d:97:76:7b:c8:fb:ee:7f:7a"]                                    
       - attach_workspace:
           at: ~/
       - run:
@@ -263,7 +263,7 @@ jobs:
       
       - checkout
       - add_ssh_keys:
-          fingerprints: ["4f:fe:90:2b:6b:8f:6d:40:84:18:6d:cf:08:f4:e4:22"]
+          fingerprints: ["d7:74:35:39:50:b2:4d:3d:97:76:7b:c8:fb:ee:7f:7a"]
       - attach_workspace:
           at: ~/      
       - run:
