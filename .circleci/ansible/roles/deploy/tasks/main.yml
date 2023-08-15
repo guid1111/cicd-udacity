@@ -7,15 +7,16 @@
   ignore_errors: True 
 
 #Pretty sure I'm missing the part where actually install the udapeople app!
-- name: make dir
-  become: true
-  shell: mkdir -p ~/application
+- name: crate application directory
+  file:
+    path: ~/application
+    state: directory  
 
 - name: deploy app
   become: true
   unarchive:
     src: artifact.tar.gz
-    dest: ~/application/
+    dest: ~/application
 
 - name: start node app
   shell: |

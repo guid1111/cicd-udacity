@@ -3,40 +3,47 @@ version: 2.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    #parameters:
-      # Add parameter here   
+    parameters:
+      AwsResourceSuffix:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy Front End environment
-          when: on_fail
-          #TODO: Check bucket is destroyed - see tips for bucket policy that will work...?
+          when: on_fail          
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} 
+            #Empty bucket before deleting stack since non-empty S2 buckets can't be deleted.
+            aws s3 rm s3://udapeople-<< parameters.AwsResourceSuffix >> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.AwsResourceSuffix >>
       - run: 
           name: Destroy Back End environment. Empty bucket first.
           when: on_fail
-          command: |
-            aws s3 rm s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} 
+          command: |            
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.AwsResourceSuffix >>
 
-#   revert-migrations:
-#     description: Revert the last migration if successfully run in the current workflow.
-#     parameters:
-#       # Add parameter here     
-#     steps:
-#       - run:
-#           name: Revert migrations
-#           # Add when this will run
-#           command: |
-#             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-#             SUCCESS = 1
-#             if(( $SUCCESS==1 )); 
-#             then
-#             #  cd ~/project/backend
-#             #  npm install
-#             #  Add revert code here. You can find this in the Getting Started section.
-#               exit 1
-#             fi
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      WorkflowId:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
+      KvdbKey:
+        type: string
+        default: WSnrgaa3QsW88gPCnCQzAn      
+    steps:
+      - run:
+          name: Revert migrations
+          # Add when this will run
+          command: |
+            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS=$(curl --insecure  https://kvdb.io/<< parameters.KvdbKey >>/migration_<< parameters.WorkflowId >>)            
+            if(( $SUCCESS==1 )); 
+            then
+              cd ~/project/backend
+              npm install
+              npm run migration:revert            
+              exit 1
+            fi
             
 jobs:
   build-frontend:
@@ -134,8 +141,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: yum install -y tar gzip      
-      # Comment out for now and deploy stacks manually while developing...
+      - run: yum install -y tar gzip            
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -155,18 +161,18 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Dynamically build inventory.txt file.
+            # Create inventory file for ansible, so that it knows which hosts to visit when running scripts.
             cd .circleci/ansible
             echo "[all]" >> inventory.txt
-            #echo "3.86.105.61" >> inventory.txt
             aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --output text >> inventory.txt            
             #aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> inventory.txt            
+            echo "invetory.txt contents..."
             cat inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment
+      #- destroy-environment
         
 
   configure-infrastructure:
@@ -189,7 +195,7 @@ jobs:
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml --ssh-common-args='-o StrictHostKeyChecking=no'
-      #- destroy-environment #leave environment up for now...      
+      #- destroy-environment
 
   run-migrations:
     docker:
@@ -207,19 +213,17 @@ jobs:
             cat migrations_dump.txt
             #https://knowledge.udacity.com/questions/999887
             #Just edit create a backend/.env file with correct contents...
+            # I don't think you need to do both this AND the step in asnble???
             #echo -e "NODE_ENV=local\nVERSION=1\nTYPEORM_CONNECTION=${TYPEORM_CONNECTION}\nTYPEORM_MIGRATIONS_DIR=${TYPEORM_MIGRATIONS_DIR}\nTYPEORM_ENTITIES=${TYPEORM_ENTITIES}\nTYPEORM_MIGRATIONS=${TYPEORM_MIGRATIONS}\nTYPEORM_HOST=${TYPEORM_HOST}\nTYPEORM_PORT=${TYPEORM_PORT}\nTYPEORM_USERNAME=${TYPEORM_USERNAME}\nTYPEORM_PASSWORD=${TYPEORM_PASSWORD}\nTYPEORM_DATABASE=${TYPEORM_DATABASE}" >> backend/.env
       - run:
           name: Send migration results to memstash
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
-            then
-              # If you are using memstash.io, generate the token "7933fe63-4687-4fa1-8426-aa25aa1730ec" on the website
-              #curl -H "Content-Type:text/plain" -H "token: 7933fe63-4687-4fa1-8426-aa25aa1730ec" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
-              # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-              # anthony.d.r.barker@gmail.com =  WSnrgaa3QsW88gPCnCQzAn
+            then              
               curl https://kvdb.io/WSnrgaa3QsW88gPCnCQzAn/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       #- destroy-environment     
+      - revert-migrations
 
   deploy-frontend:
     docker:      
@@ -247,10 +251,10 @@ jobs:
             cd frontend
             npm install
             npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist            
-            #aws s3 cp dist s3://udapeople-067215852314 --recursive
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist                        
             aws s3 cp dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       #- destroy-environment     
+      - revert-migrations
                     
   deploy-backend:
     docker:
@@ -277,36 +281,49 @@ jobs:
             npm run build
             cd ..
             ## Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
-            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
+            tar -C backend -czvf ./artifact.tar.gz .          
+            cp ./artifact.tar.gz .circleci/ansible/roles/deploy/files
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'   
       #- destroy-environment     
+      - revert-migrations
 
-#   smoke-test:
-#     docker:
-#       # Lightweight Docker image 
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Get backend url
-#           command: |
-#             # your code here
-#       - run:
-#           name: Backend smoke test.
-#           command: |
-#             # your code here
-#       - run:
-#           name: Frontend smoke test.
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  smoke-test:
+    docker:
+      - image: python:3.9.16
+    steps:
+      # Checkout code from git
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update -y
+            apt-get install -y awscli
+      - run:
+          name: Backend smoke test.
+          command: |
+            BACKEND_DNSNAME=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
+            API_URL="http://${BACKEND_DNSNAME}:3030"
+            echo "API_URL = ${API_URL}"
+            if curl -s $API_URL/api/status | grep "ok"
+            then
+              exit 0
+            else
+              exit 1
+            fi      
+      - run:
+          name: Frontend smoke test.
+          command: |            
+            FRONTEND_WEBSITE=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
+            if curl -s $FRONTEND_WEBSITE | grep "Welcome"
+            then
+              exit 0
+            else
+              exit 1
+            fi
+      #- destroy-environment     
+      - revert-migrations
 
 #   cloudfront-update:
 #     docker:
@@ -373,8 +390,8 @@ workflows:
            requires: [run-migrations]
       - deploy-backend:
            requires: [run-migrations]
- #     - smoke-test:
- #         requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
  #     - cloudfront-update:
  #         requires: [smoke-test]
  #     - cleanup:
