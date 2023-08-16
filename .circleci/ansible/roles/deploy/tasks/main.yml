@@ -36,7 +36,7 @@
 - name: "npm install"
   become: true
   shell: |
-      cd /home/ununtu/application
+      cd /home/ubuntu/application
       npm install
 
 
