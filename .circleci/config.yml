@@ -390,7 +390,14 @@ jobs:
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+
+              aws s3 ls udapeople-${OldWorkflowID}
+              if [ $? -eq 0 ]; then
+                # The bucket exists, so empty it
+                echo "Emptying S3 bucket"
+                aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+                echo "S3 bucket emptied successfully."
+              fi
 
               aws cloudformation describe-stacks --stack-name "udapeople-backend-${OldWorkflowID}"
               if [ $? -eq 0 ]; then
@@ -398,6 +405,7 @@ jobs:
                 echo "Deleting stack udapeople-backend-${OldWorkflowID}"
                 aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
               fi
+
               aws cloudformation describe-stacks --stack-name "udapeople-frontend-${OldWorkflowID}"
               if [ $? -eq 0 ]; then
                 # The stack exists, so delete it
