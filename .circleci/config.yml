@@ -190,6 +190,8 @@ jobs:
           command: |                        
             apt-get update -y
             apt install ansible -y    
+            apt install npm -y
+            apt-get install -y awscli
       - run: 
           name: Setup Environment Variables
           command: |
