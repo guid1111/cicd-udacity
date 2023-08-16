@@ -1,5 +1,4 @@
 ---
-#Pretty sure I'm missing the part where actually install the udapeople app!
 - name: create application directory
   file:
     path: /home/ubuntu/application
@@ -25,33 +24,36 @@
 #   become: true
 #   command: "npm install"
 
-#Maybe try this...
 - name: "npm install"
   become: true
   shell: |
       cd /home/ubuntu/application
       npm install
 
+# - name: pm2 stop
+#   become: true
+#   command: "pm2 stop default"
+#   ignore_errors: True 
+
 - name: pm2 stop
   become: true
-  command: "pm2 stop default"
-  ignore_errors: True 
+  shell: |
+    cd /home/ubuntu/application
+    pm2 stop default
 
 
-#Not sure if need this?
-# - name: start node app
-#   shell: |
-#     cd ~/application/dist
-#     pm2 start main.js
-
-
+# - name: pm2 start
+#   become: true
+#   command: "pm2 start npm -- start"
+  #ignore_errors: True 
 
 - name: pm2 start
   become: true
-  command: "pm2 start npm -- start"
-  #ignore_errors: True 
+  shell: |
+    cd /home/ubuntu/application
+    pm2 start npm -- start
+    
+#   command: "pm2 start npm -- start"
 
-#npm install ALREADY DONE??
-#pm2 stop default
-#pm2 start npm -- start
+
 
