@@ -20,15 +20,33 @@
     dest: /home/ubuntu/application
     owner: ubuntu
 
+
+#For some reason npm install didnt' succeed
+# but connect to box.  change to /home/ununtu/application
+# npm install
+# pm2 start npm -- start
+# and it worked!
+# Did it fail because directory not correct?
+
+# - name: "npm install"
+#   become: true
+#   command: "npm install"
+
+#Maybe try this...
 - name: "npm install"
   become: true
-  command: "npm install"
+  shell: |
+      cd /home/ununtu/application
+      npm install
+
 
 #Not sure if need this?
 # - name: start node app
 #   shell: |
 #     cd ~/application/dist
 #     pm2 start main.js
+
+
 
 - name: pm2 start
   become: true

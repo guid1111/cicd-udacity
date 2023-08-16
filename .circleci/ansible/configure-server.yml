@@ -42,4 +42,4 @@
 
   roles:
     - configure-server
-    #- configure-prometheus-node-exporter    
+    - configure-prometheus-node-exporter    

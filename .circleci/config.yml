@@ -172,7 +172,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      #- destroy-environment
+      - destroy-environment
         
 
   configure-infrastructure:
@@ -217,7 +217,7 @@ jobs:
           root: ~/
           paths:
             - project/backend/.env
-      #- destroy-environment
+      - destroy-environment
 
   run-migrations:
     docker:
@@ -244,7 +244,7 @@ jobs:
             then              
               curl --insecure https://kvdb.io/WSnrgaa3QsW88gPCnCQzAn/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      #- destroy-environment     
+      - destroy-environment     
       - revert-migrations
 
   deploy-frontend:
@@ -275,14 +275,13 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist                        
             aws s3 cp dist s3://udapeople-"${CIRCLE_WORKFLOW_ID:0:7}" --recursive
-      #- destroy-environment     
+      - destroy-environment     
       - revert-migrations
                     
   deploy-backend:
     docker:
       - image: python:3.9.16
-    steps:
-      
+    steps:      
       - checkout
       - add_ssh_keys:
           fingerprints: ["d7:74:35:39:50:b2:4d:3d:97:76:7b:c8:fb:ee:7f:7a"]
@@ -310,7 +309,7 @@ jobs:
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'   
-      #- destroy-environment     
+      - destroy-environment     
       - revert-migrations
 
   smoke-test:
@@ -331,7 +330,8 @@ jobs:
             echo "API_URL = ${API_URL}"
             if curl -s $API_URL/api/status | grep "ok"
             then
-              exit 0
+              #exit 0 Deliberately break smoke test
+              exit 1
             else
               exit 1
             fi      
@@ -341,47 +341,58 @@ jobs:
             FRONTEND_WEBSITE=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
             if curl -s $FRONTEND_WEBSITE | grep "Welcome"
             then
-              exit 0
+              #exit 0
+              exit 1
             else
               exit 1
             fi
-      #- destroy-environment     
+      - destroy-environment     
       - revert-migrations
 
-#   cloudfront-update:
-#     docker:
-#       # Docker image here that supports AWS CLI
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Update cloudfront distribution
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+#TODO: This changes the bucket behind a cloud front distribution.  Need to run the manual step to create the cloud front distribution + "old" bucket it points at...
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --stack-name InitialStack \
+            --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --tags project=udapeople
+      - destroy-environment     
+      - revert-migrations
 
-# cleanup:
-#     docker:
-#       # Docker image here
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Get old stack workflow id
-#           command: |
-#             # your code here
-#             export OldWorkflowID="the id here"
-#             export STACKS=[] #put the list of stacks here
-#       - run:
-#           name: Remove old stacks and files
-#           command: |
-#             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-#             then
-#               # your code here
-#             fi
+  cleanup:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Get old stack workflow id
+          command: |
+            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+            echo Stack names: "${STACKS[@]}" 
             
+      - run:
+          name: Remove old stacks and files
+          command: |
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            then
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}
+            fi
 
 workflows:
   default:
@@ -400,11 +411,11 @@ workflows:
       ########################
       - deploy-infrastructure:
           requires: [build-frontend, build-backend]
- #     - deploy-infrastructure:
- #         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
- #         filters:
- #           branches:
- #             only: [test-feature-branch]       
+          #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            #Only builds on master will deploy. Pipelines for other branches will stop and build, test, scan.
+            branches:            
+              only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
@@ -415,7 +426,7 @@ workflows:
            requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
- #     - cloudfront-update:
- #         requires: [smoke-test]
- #     - cleanup:
- #         requires: [cloudfront-update]
+      # - cloudfront-update:
+      #     requires: [smoke-test]
+      # - cleanup:
+      #     requires: [cloudfront-update]
