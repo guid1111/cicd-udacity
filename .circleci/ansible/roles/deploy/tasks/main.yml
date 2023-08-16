@@ -1,11 +1,4 @@
 ---
-
-
-- name: pm2 stop
-  become: true
-  command: "pm2 stop default"
-  ignore_errors: True 
-
 #Pretty sure I'm missing the part where actually install the udapeople app!
 - name: create application directory
   file:
@@ -38,6 +31,11 @@
   shell: |
       cd /home/ubuntu/application
       npm install
+
+- name: pm2 stop
+  become: true
+  command: "pm2 stop default"
+  ignore_errors: True 
 
 
 #Not sure if need this?
