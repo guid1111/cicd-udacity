@@ -12,15 +12,6 @@ Resources:
     Properties:
       GroupName: !Sub UdaPeople-${ID}
       GroupDescription: Allow port 22 and port 3030.
-      # SecurityGroupEgress: YOU CAN'T HAVE Egress without VPC id??
-      #   - IpProtocol: tcp
-      #     FromPort: 5432
-      #     ToPort: 5432
-      #     CidrIp: 0.0.0.0/0
-      #   - IpProtocol: tcp
-      #     FromPort: 9100
-      #     ToPort: 9100
-      #     CidrIp: 0.0.0.0/0
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
@@ -35,10 +26,10 @@ Resources:
           ToPort: 9100
           CidrIp: 0.0.0.0/0
           # I can't see why you'd need ingress for database.
-        # - IpProtocol: tcp
-        #   FromPort: 5432
-        #   ToPort: 5432
-        #   CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
 
   EC2Instance:
     Type: AWS::EC2::Instance
